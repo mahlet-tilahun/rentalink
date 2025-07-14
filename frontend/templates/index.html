@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}RentaLink - Find Your Perfect Rental{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Find Your Perfect Rental</h1>
+                <p class="lead mb-4">Discover houses, cars, and motorcycles for rent across Rwanda. Safe, verified, and easy to book.</p>
+                <a href="{{ url_for('search') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-search me-2"></i>Start Searching
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <i class="fas fa-home fa-10x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Search -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4">Quick Search</h3>
+                        <form action="{{ url_for('search') }}" method="GET">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <select name="category" class="form-select">
+                                        <option value="">All Categories</option>
+                                        <option value="house">Houses</option>
+                                        <option value="car">Cars</option>
+                                        <option value="motorcycle">Motorcycles</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="location" class="form-control" placeholder="Location (e.g., Kigali, Remera)">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-2"></i>Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Browse by Category</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card category-card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-house fa-4x text-primary mb-3"></i>
+                        <h4>Houses</h4>
+                        <p class="text-muted">Find apartments, houses, and rooms for rent across Rwanda.</p>
+                        <a href="{{ url_for('search', category='house') }}" class="btn btn-outline-primary">Browse Houses</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card category-card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-car fa-4x text-success mb-3"></i>
+                        <h4>Cars</h4>
+                        <p class="text-muted">Rent cars for daily, weekly, or monthly periods.</p>
+                        <a href="{{ url_for('search', category='car') }}" class="btn btn-outline-success">Browse Cars</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card category-card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-motorcycle fa-4x text-warning mb-3"></i>
+                        <h4>Motorcycles</h4>
+                        <p class="text-muted">Quick and affordable motorcycle rentals for city transport.</p>
+                        <a href="{{ url_for('search', category='motorcycle') }}" class="btn btn-outline-warning">Browse Motorcycles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Listings -->
+{% if listings %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Recent Listings</h2>
+        <div class="row">
+            {% for listing in listings %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card listing-card h-100 shadow-sm">
+                    <div class="card-img-top listing-image">
+                        {% if listing.image_urls %}
+                            <img src="{{ listing.image_urls.split(',')[0] }}" alt="{{ listing.title }}" class="img-fluid">
+                        {% else %}
+                            <div class="placeholder-image d-flex align-items-center justify-content-center">
+                                {% if listing.type == 'house' %}
+                                    <i class="fas fa-house fa-3x text-muted"></i>
+                                {% elif listing.type == 'car' %}
+                                    <i class="fas fa-car fa-3x text-muted"></i>
+                                {% else %}
+                                    <i class="fas fa-motorcycle fa-3x text-muted"></i>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">{{ listing.title }}</h5>
+                            <span class="badge bg-primary">{{ listing.type.title() }}</span>
+                        </div>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ listing.location }}
+                        </p>
+                        <p class="text-success fw-bold mb-3">
+                            <i class="fas fa-money-bill-wave me-1"></i>{{ "{:,.0f}".format(listing.price) }} RWF
+                        </p>
+                        <a href="{{ url_for('listing_detail', id=listing.id) }}" class="btn btn-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('search') }}" class="btn btn-outline-primary">View All Listings</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose RentaLink?</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-box text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h4>Verified Listings</h4>
+                    <p class="text-muted">All listings are verified by our admin team for your safety and peace of mind.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-box text-center">
+                    <i class="fas fa-search fa-3x text-success mb-3"></i>
+                    <h4>Easy Search</h4>
+                    <p class="text-muted">Find exactly what you're looking for with our advanced search and filter options.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-box text-center">
+                    <i class="fas fa-phone fa-3x text-warning mb-3"></i>
+                    <h4>Direct Contact</h4>
+                    <p class="text-muted">Connect directly with property owners and rental providers for the best deals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add hover effects to category cards
+document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+        this.style.transition = 'transform 0.3s ease';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+
+// Add hover effects to listing cards
+document.querySelectorAll('.listing-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-3px)';
+        this.style.transition = 'transform 0.3s ease';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+</script>
+{% endblock %}
