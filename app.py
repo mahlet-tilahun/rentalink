@@ -48,7 +48,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
     reviewer_name = db.Column(db.String(100), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
