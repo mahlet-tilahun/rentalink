@@ -72,6 +72,9 @@ class Inquiry(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     listing = db.relationship('Listing', backref=db.backref('inquiries', lazy=True))
+
+
+
 # Routes
 @app.route('/')
 def index():
@@ -317,7 +320,7 @@ def create_tables():
     with app.app_context():
         db.create_all()
         
-        # Create admin user if doesn't exist
+        # Create admin if doesn't exist
         admin = User.query.filter_by(email='admin@rentalink.com').first()
         if not admin:
             admin = User(
