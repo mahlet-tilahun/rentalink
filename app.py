@@ -29,7 +29,7 @@ class User(db.Model):
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+          return check_password_hash(self.password_hash, password)
 
 class Listing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,8 +38,8 @@ class Listing(db.Model):
     location = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
-    features = db.Column(db.Text)  # JSON string of features
-    image_urls = db.Column(db.Text)  # JSON string of image URLs
+    features = db.Column(db.Text)  #  string of features
+    image_urls = db.Column(db.Text)  #  string of image URLs
     description = db.Column(db.Text)
     contact_info = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
