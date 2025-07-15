@@ -52,6 +52,26 @@ class Review(db.Model):
     comment = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Reservation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(20))
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    listing = db.relationship('Listing', backref=db.backref('reservations', lazy=True))
+class Inquiry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'))
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    message = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    listing = db.relationship('Listing', backref=db.backref('inquiries', lazy=True))
 # Routes
 @app.route('/')
 def index():
