@@ -69,6 +69,13 @@
                     <a href="{{ url_for('add_listing') }}" class="nav-link">
                         <i class="fas fa-plus me-2"></i>Add New Listing
                     </a>
+                    <a class="nav-link" href="{{ url_for('admin_reservations') }}">
+                        <i class="fas fa-calendar-check me-2"></i>Reservations
+                    </a>
+                    <a class="nav-link" href="{{ url_for('admin_inquiries') }}">
+                        <i class="fas fa-envelope-open-text me-2"></i>Inquiries
+                    </a>
+
                     <a class="nav-link" href="#reviews" data-section="reviews">
                         <i class="fas fa-star me-2"></i>Reviews
                     </a>
@@ -191,7 +198,7 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <a href="{{ url_for('edit_listing', id=listing.id) }}" class="btn btn-sm btn-primary">
+                                                <a href="{{ url_for('edit_listing', listing_id=listing.id) }}" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
 
@@ -240,8 +247,7 @@
                     </tbody>
                 </table>
                 </div>
-
-
+                
             </div>
         </div>
     </div>
