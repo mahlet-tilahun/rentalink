@@ -21,7 +21,7 @@
                 <div class="card-body p-0">
                     {% if listing.image_urls %}
                         {% set images = listing.image_urls.split(',') %}
-                        <div id="listingCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div id="listingCarousel{{ listing.id }}" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-inner">
                                 {% for image in images %}
                                 <div class="carousel-item {% if loop.first %}active{% endif %}">
@@ -31,11 +31,13 @@
                                 {% endfor %}
                             </div>
                             {% if images|length > 1 %}
-                            <button class="carousel-control-prev" type="button" data-bs-target="#listingCarousel" data-bs-slide="prev">
+                            <button class="carousel-control-prev" type="button" data-bs-target="#listingCarousel{{ listing.id }}" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon"></span>
+                                <span class="visually-hidden">Previous</span>
                             </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#listingCarousel" data-bs-slide="next">
+                            <button class="carousel-control-next" type="button" data-bs-target="#listingCarousel{{ listing.id }}" data-bs-slide="next">
                                 <span class="carousel-control-next-icon"></span>
+                                <span class="visually-hidden">Next</span>
                             </button>
                             {% endif %}
                         </div>
