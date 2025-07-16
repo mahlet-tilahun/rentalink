@@ -68,16 +68,22 @@
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card h-100 shadow-sm listing-card">
                                 <div class="position-relative">
-                                    {% if listing.image_urls %}
-                                        <img src="{{ listing.image_urls.split(',')[0] }}" 
-                                             class="card-img-top" alt="{{ listing.title }}" 
-                                             style="height: 200px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light" 
-                                             style="height: 200px;">
-                                            <i class="fas fa-image fa-3x text-muted"></i>
-                                        </div>
-                                    {% endif %}
+                                    <div class="card-img-top listing-image">
+                                        {% if listing.image_urls %}
+                                            {% set first_image = listing.image_urls.replace('[','').replace(']','').replace('"','').split(',')[0].strip() %}
+                                            <img src="{{ url_for('static', filename='images/listings/' ~ first_image) }}" alt="{{ listing.title }}">
+                                        {% else %}
+                                            <div class="placeholder-image d-flex align-items-center justify-content-center">
+                                                {% if listing.type == 'house' %}
+                                                    <i class="fas fa-house fa-3x text-muted"></i>
+                                                {% elif listing.type == 'car' %}
+                                                    <i class="fas fa-car fa-3x text-muted"></i>
+                                                {% else %}
+                                                    <i class="fas fa-motorcycle fa-3x text-muted"></i>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                     
                                     <!-- Category Badge -->
                                     <span class="badge position-absolute top-0 end-0 m-2 
