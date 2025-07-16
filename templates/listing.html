@@ -202,6 +202,32 @@
                             </button>
                         </form>
                     </div>
+                    <!-- Reserve Form -->
+                    <div class="mb-3">
+                        <h6><i class="fas fa-calendar-check text-primary"></i> Reserve This {{ listing.type.title() }}</h6>
+                        <form action="{{ url_for('reserve', listing_id=listing.id) }}" method="post">
+                            <div class="mb-2">
+                                <input type="text" class="form-control form-control-sm" name="name" placeholder="Your Name" required>
+                            </div>
+                            <div class="mb-2">
+                                <input type="email" class="form-control form-control-sm" name="email" placeholder="Your Email" required>
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" class="form-control form-control-sm" name="phone" placeholder="Your Phone">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small mb-0">Start Date</label>
+                                <input type="date" class="form-control form-control-sm" name="start_date" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small mb-0">End Date</label>
+                                <input type="date" class="form-control form-control-sm" name="end_date" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-calendar-check"></i> Reserve Now
+                            </button>
+                        </form>
+                    </div>
 
                     <!-- Share Buttons -->
                     <div class="border-top pt-3">
