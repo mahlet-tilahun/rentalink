@@ -136,6 +136,7 @@ def admin_login():
 def admin_dashboard():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
+<<<<<<< HEAD
     search_query = request.args.get('search', '')
 
     if search_query:
@@ -145,6 +146,8 @@ def admin_dashboard():
         ).order_by(Listing.id.desc()).all()
     else:
         listings = Listing.query.order_by(Listing.id.desc()).all()
+=======
+>>>>>>> e37099b8ff67c95fe5eedf6092df6b7201c83f75
 
     listings = Listing.query.all()
     reviews = Review.query.order_by(Review.timestamp.desc()).all()
@@ -156,6 +159,7 @@ def admin_logout():
     flash('Logged out successfully!', 'success')
     return redirect(url_for('index'))
 
+<<<<<<< HEAD
 @app.route('/admin/manage-listings')
 def manage_listings():
     if 'admin_id' not in session:
@@ -172,6 +176,8 @@ def manage_listings():
 
     return render_template('admin/manage_listings.html', listings=listings)
 
+=======
+>>>>>>> e37099b8ff67c95fe5eedf6092df6b7201c83f75
 @app.route('/admin/edit-listing/<int:listing_id>', methods=['GET', 'POST'])
 def edit_listing(listing_id):
     if 'admin_id' not in session:
@@ -393,8 +399,13 @@ def submit_inquiry(listing_id):
 
     inquiry = Inquiry(
         listing_id=listing_id,
+<<<<<<< HEAD
         name=name,
         email=email,
+=======
+        user_name=name,
+        user_email=email,
+>>>>>>> e37099b8ff67c95fe5eedf6092df6b7201c83f75
         message=message
     )
     db.session.add(inquiry)
