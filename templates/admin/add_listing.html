@@ -42,44 +42,40 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0 sidebar">
-                <div class="p-3 text-center border-bottom border-secondary">
-                    <h4 class="text-white mb-0">RentaLink</h4>
-                    <small class="text-white-50">Admin Panel</small>
-                </div>
-
-                <nav class="nav flex-column">
-                    <a class="nav-link" href="#dashboard" data-section="dashboard">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                    </a>
-                    <a class="nav-link" href="#listings" data-section="listings">
-                        <i class="fas fa-list me-2"></i>Manage Listings
-                    </a>
-                    <a class="nav-link active" href="{{ url_for('add_listing') }}" class="nav-link">
-                        <i class="fas fa-plus me-2"></i>Add New Listing
-                    </a>
-                    <a class="nav-link" href="{{ url_for('admin_reservations') }}">
-                        <i class="fas fa-calendar-check me-2"></i>Reservations
-                    </a>
-                    <a class="nav-link" href="{{ url_for('admin_inquiries') }}">
-                        <i class="fas fa-envelope-open-text me-2"></i>Inquiries
-                    </a>
-
-                    <a class="nav-link" href="#reviews" data-section="reviews">
-                        <i class="fas fa-star me-2"></i>Reviews
-                    </a>
-                    <div class="border-top border-secondary mt-3 pt-3">
-                        <a class="nav-link" href="{{ url_for('index') }}" target="_blank">
-                            <i class="fas fa-external-link-alt me-2"></i>View Website
-                        </a>
-                        <a class="nav-link" href="{{ url_for('admin_logout') }}">
-                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                        </a>
-
-
-                    </div>
-                </nav>
+            <div class="col-md-3 col-lg-2 px-0 sidebar bg-dark text-white">
+            <div class="p-3 text-center border-bottom border-secondary">
+                <h4 class="text-white mb-0">RentaLink</h4>
+                <small class="text-white-50">Admin Panel</small>
             </div>
+            <nav class="nav flex-column">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('manage_listings') }}">
+                    <i class="fas fa-list me-2"></i>Manage Listings
+                </a>
+                <a class="nav-link active" href="{{ url_for('add_listing') }}">
+                    <i class="fas fa-plus me-2"></i>Add New Listing
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_reservations') }}">
+                    <i class="fas fa-calendar-check me-2"></i>Reservations
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_inquiries') }}">
+                    <i class="fas fa-envelope-open-text me-2"></i>Inquiries
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}#reviews">
+                    <i class="fas fa-star me-2"></i>Reviews
+                </a>
+                <div class="border-top border-secondary mt-3 pt-3">
+                    <a class="nav-link" href="{{ url_for('index') }}" target="_blank">
+                        <i class="fas fa-external-link-alt me-2"></i>View Website
+                    </a>
+                    <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </nav>
+        </div>
 
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10 main-content p-4">
