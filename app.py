@@ -147,6 +147,23 @@ def admin_logout():
     flash('Logged out successfully!', 'success')
     return redirect(url_for('index'))
 
+@app.route('/admin/manage-listings')
+def manage_listings():
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+
+    search_query = request.args.get('search', '')
+    if search_query:
+        listings = Listing.query.filter(
+            Listing.title.ilike(f'%{search_query}%') | 
+            Listing.location.ilike(f'%{search_query}%')
+        ).all()
+    else:
+        listings = Listing.query.all()
+
+    return render_template('admin/manage_listings.html', listings=listings)
+
+
 @app.route('/admin/edit-listing/<int:listing_id>', methods=['GET', 'POST'])
 def edit_listing(listing_id):
     if 'admin_id' not in session:
