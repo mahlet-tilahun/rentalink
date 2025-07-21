@@ -51,11 +51,14 @@
                 <a class="nav-link" href="{{ url_for('add_listing') }}">
                     <i class="fas fa-plus me-2"></i>Add New Listing
                 </a>
-                <a class="nav-link" href="{{ url_for('admin_dashboard') }}#reviews">
-                    <i class="fas fa-star me-2"></i>Reviews
-                </a>
                 <a class="nav-link" href="{{ url_for('admin_reservations') }}">
                     <i class="fas fa-calendar-check me-2"></i>Reservations
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_inquiries') }}">
+                    <i class="fas fa-envelope-open-text me-2"></i>Inquiries
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}#reviews">
+                    <i class="fas fa-star me-2"></i>Reviews
                 </a>
                 <div class="border-top border-secondary mt-3 pt-3">
                     <a class="nav-link" href="{{ url_for('index') }}" target="_blank">
