@@ -358,24 +358,31 @@ def reserve(listing_id):
     phone = request.form['phone']
     start_date = request.form['start_date']
     end_date = request.form['end_date']
+    if request.method == 'POST':
+        reservation = Reservation(
+            listing_id=listing_id,
+            name=name,
+            email=email,
+            phone=phone,
+            start_date=datetime.strptime(start_date, '%Y-%m-%d').date(),
+            end_date=datetime.strptime(end_date, '%Y-%m-%d').date()
+        )
 
-    reservation = Reservation(
-        listing_id=listing_id,
-        name=name,
-        email=email,
-        phone=phone,
-        start_date=datetime.strptime(start_date, '%Y-%m-%d').date(),
-        end_date=datetime.strptime(end_date, '%Y-%m-%d').date()
-    )
+        # Optional: mark listing as unavailable
+        listing.is_available = False
 
-    # Optional: mark listing as unavailable
-    listing.is_available = False
+        db.session.add(reservation)
+        db.session.commit()
 
-    db.session.add(reservation)
-    db.session.commit()
-
-    flash('Reservation successful! We will contact you soon.', 'success')
+        flash('Reservation successful! We will contact you soon.', 'success')
+        return redirect(url_for('receipt', reservation_id=reservation.id))
     return redirect(url_for('listing_detail', id=listing_id))
+
+@app.route('/receipt/<int:reservation_id>')
+def receipt(reservation_id):
+    reservation = Reservation.query.get_or_404(reservation_id)
+    return render_template('receipt.html', reservation=reservation)
+
 
 @app.route('/inquiry/<int:listing_id>', methods=['POST'])
 def submit_inquiry(listing_id):

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reservation Receipt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            padding: 2rem;
+        }
+        .receipt-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        @media print {
+            #printBtn,
+            .btn-back-home {
+                display: none;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container receipt-container">
+        <h2>Reservation Receipt</h2>
+        <hr>
+        <p><strong>Receipt ID:</strong> {{ reservation.id }}</p>
+        <p><strong>Name:</strong> {{ reservation.name }}</p>
+        <p><strong>Email:</strong> {{ reservation.email }}</p>
+        <p><strong>Phone:</strong> {{ reservation.phone }}</p>
+        <p><strong>Listing:</strong> {{ reservation.listing.title }}</p>
+        <p><strong>Dates:</strong> {{ reservation.start_date }} to {{ reservation.end_date }}</p>
+        <p><strong>Timestamp:</strong> {{ reservation.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+
+        <hr>
+        <button id="printBtn" class="btn btn-success">Print Receipt</button>
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-back-home">Go Back to Home</a>
+
+    </div>
+
+    <script>
+        document.getElementById('printBtn').addEventListener('click', function() {
+            window.print();
+        });
+
+    </script>
+</body>
+</html>
