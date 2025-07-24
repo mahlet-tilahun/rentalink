@@ -371,8 +371,8 @@ def submit_inquiry(listing_id):
 
     inquiry = Inquiry(
         listing_id=listing_id,
-        user_name=name,
-        user_email=email,
+        name=name,
+        email=email,
         message=message
     )
     db.session.add(inquiry)
