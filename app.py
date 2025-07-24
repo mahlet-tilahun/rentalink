@@ -38,8 +38,8 @@ class Listing(db.Model):
     location = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
-    features = db.Column(db.Text)  # JSON string of features
-    image_urls = db.Column(db.Text)  # JSON string of image URLs
+    features = db.Column(db.Text)
+    image_urls = db.Column(db.Text)
     description = db.Column(db.Text)
     contact_info = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -48,7 +48,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'), nullable=False)
     reviewer_name = db.Column(db.String(100), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -63,6 +63,7 @@ class Reservation(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     listing = db.relationship('Listing', backref=db.backref('reservations', lazy=True))
+
 class Inquiry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'))
@@ -74,23 +75,19 @@ class Inquiry(db.Model):
     listing = db.relationship('Listing', backref=db.backref('inquiries', lazy=True))
 
 
-
 # Routes
 @app.route('/')
 def index():
-    # Get recent listings for homepage
     recent_listings = Listing.query.filter_by(is_available=True).order_by(Listing.created_at.desc()).limit(6).all()
     return render_template('index.html', listings=recent_listings)
 
 @app.route('/search')
 def search():
-    # Get search parameters
     category = request.args.get('category', '')
     location = request.args.get('location', '')
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
     
-    # Build query
     query = Listing.query.filter_by(is_available=True)
     
     if category:
@@ -114,29 +111,24 @@ def listing_detail(id):
     reviews = Review.query.filter_by(listing_id=id).order_by(Review.timestamp.desc()).all()
     return render_template('listing.html', listing=listing, reviews=reviews)
 
-# Admin Routes
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        
         user = User.query.filter_by(email=email, user_role='admin').first()
-        
         if user and user.check_password(password):
             session['admin_id'] = user.id
             flash('Login successful!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Invalid credentials!', 'error')
-    
     return render_template('admin/login.html')
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-
     listings = Listing.query.all()
     reviews = Review.query.order_by(Review.timestamp.desc()).all()
     return render_template('admin/dashboard.html', listings=listings, reviews=reviews)
@@ -153,16 +145,25 @@ def manage_listings():
         return redirect(url_for('admin_login'))
 
     search_query = request.args.get('search', '')
+    type_filter = request.args.get('type_filter', '')
+    availability_filter = request.args.get('availability_filter', '')
+
+    query = Listing.query
+
     if search_query:
-        listings = Listing.query.filter(
+        query = query.filter(
             Listing.title.ilike(f'%{search_query}%') | 
             Listing.location.ilike(f'%{search_query}%')
-        ).all()
-    else:
-        listings = Listing.query.all()
+        )
+    if type_filter:
+        query = query.filter(Listing.type == type_filter)
+    if availability_filter == 'available':
+        query = query.filter(Listing.is_available.is_(True))
+    elif availability_filter == 'unavailable':
+        query = query.filter(Listing.is_available.is_(False))
 
+    listings = query.order_by(Listing.created_at.desc()).all()
     return render_template('admin/manage_listings.html', listings=listings)
-
 
 @app.route('/admin/edit-listing/<int:listing_id>', methods=['GET', 'POST'])
 def edit_listing(listing_id):
@@ -181,7 +182,6 @@ def edit_listing(listing_id):
         listing.description = request.form['description']
         listing.contact_info = request.form['contact_info']
 
-        # Handle new images if uploaded
         image_urls = []
         if 'images' in request.files:
             for image in request.files.getlist('images'):
@@ -192,7 +192,7 @@ def edit_listing(listing_id):
                     image_urls.append(filename)
 
         if image_urls:
-            listing.image_urls = ','.join(image_urls)  # Replace old images only if new ones uploaded
+            listing.image_urls = ','.join(image_urls)
 
         db.session.commit()
         flash('Listing updated successfully!', 'success')
@@ -204,13 +204,11 @@ def edit_listing(listing_id):
 def delete_listing(id):
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-    
     listing = Listing.query.get_or_404(id)
     db.session.delete(listing)
     db.session.commit()
     flash('Listing deleted successfully!', 'success')
     return redirect(url_for('admin_dashboard'))
-
 
 @app.route('/admin/add-listing', methods=['GET', 'POST'])
 def add_listing():
@@ -218,7 +216,6 @@ def add_listing():
         return redirect(url_for('admin_login'))
 
     if request.method == 'POST':
-        # Get form data
         type = request.form['type']
         title = request.form['title']
         location = request.form['location']
@@ -228,7 +225,6 @@ def add_listing():
         description = request.form['description']
         contact_info = request.form['contact_info']
 
-        # Handle multiple images
         image_urls = []
         if 'images' in request.files:
             images = request.files.getlist('images')
@@ -237,13 +233,10 @@ def add_listing():
                     filename = secure_filename(image.filename)
                     save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     image.save(save_path)
-                    # Store the path relative to /static/
                     image_urls.append(filename)
 
-        # Join the image URLs as a single string
         image_urls_str = ','.join(image_urls) if image_urls else ''
 
-        # Create new listing
         new_listing = Listing(
             type=type,
             title=title,
@@ -264,58 +257,51 @@ def add_listing():
 
     return render_template('admin/add_listing.html')
 
-
 @app.route('/admin/inquiries')
 def admin_inquiries():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-
     inquiries = Inquiry.query.order_by(Inquiry.timestamp.desc()).all()
     return render_template('admin/inquiries.html', inquiries=inquiries)
-
 
 @app.route('/listing/<int:listing_id>/add_review', methods=['POST'])
 def add_review(listing_id):
     try:
         listing = Listing.query.get_or_404(listing_id)
-        
         reviewer_name = request.form.get('reviewer_name')
         reviewer_email = request.form.get('reviewer_email')
         rating = int(request.form.get('rating'))
         comment = request.form.get('comment', '')
-        
+
         if not reviewer_name or not reviewer_email or not rating:
             flash('Please fill in all required fields.', 'error')
             return redirect(url_for('listing_detail', id=listing_id))
-        
         if rating < 1 or rating > 5:
             flash('Rating must be between 1 and 5 stars.', 'error')
             return redirect(url_for('listing_detail', id=listing_id))
-        
+
         new_review = Review(
             listing_id=listing_id,
             reviewer_name=reviewer_name,
             rating=rating,
             comment=comment
         )
-        
         db.session.add(new_review)
         db.session.commit()
-        
         flash('Thank you for your review!', 'success')
-        
+
     except ValueError:
         flash('Invalid rating value. Please try again.', 'error')
-    except Exception as e:
+    except Exception:
         flash('An error occurred while submitting your review. Please try again.', 'error')
         db.session.rollback()
     
     return redirect(url_for('listing_detail', id=listing_id))
+
 @app.route('/admin/reservations')
 def admin_reservations():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-
     reservations = Reservation.query.order_by(Reservation.timestamp.desc()).all()
     return render_template('admin/reservations.html', reservations=reservations)
 
@@ -323,41 +309,38 @@ def admin_reservations():
 def contact_owner(listing_id):
     try:
         listing = Listing.query.get_or_404(listing_id)
-        
         name = request.form.get('name')
         email = request.form.get('email')
         message = request.form.get('message', '')
-        
         if not name or not email:
             flash('Please fill in all required fields.', 'error')
             return redirect(url_for('listing_detail', id=listing_id))
-        
+
         new_inquiry = Inquiry(
             listing_id=listing_id,
             name=name,
             email=email,
             message=message
         )
-        
         db.session.add(new_inquiry)
         db.session.commit()
-        
         flash('Your inquiry has been sent!', 'success')
-        
-    except Exception as e:
+
+    except Exception:
         flash('An error occurred while sending your inquiry. Please try again.', 'error')
         db.session.rollback()
-    
+
     return redirect(url_for('listing_detail', id=listing_id))
+
 @app.route('/reserve/<int:listing_id>', methods=['POST'])
 def reserve(listing_id):
     listing = Listing.query.get_or_404(listing_id)
-
     name = request.form['name']
     email = request.form['email']
     phone = request.form['phone']
     start_date = request.form['start_date']
     end_date = request.form['end_date']
+
     if request.method == 'POST':
         reservation = Reservation(
             listing_id=listing_id,
@@ -367,22 +350,18 @@ def reserve(listing_id):
             start_date=datetime.strptime(start_date, '%Y-%m-%d').date(),
             end_date=datetime.strptime(end_date, '%Y-%m-%d').date()
         )
-
-        # Optional: mark listing as unavailable
         listing.is_available = False
-
         db.session.add(reservation)
         db.session.commit()
-
         flash('Reservation successful! We will contact you soon.', 'success')
         return redirect(url_for('receipt', reservation_id=reservation.id))
+    
     return redirect(url_for('listing_detail', id=listing_id))
 
 @app.route('/receipt/<int:reservation_id>')
 def receipt(reservation_id):
     reservation = Reservation.query.get_or_404(reservation_id)
     return render_template('receipt.html', reservation=reservation)
-
 
 @app.route('/inquiry/<int:listing_id>', methods=['POST'])
 def submit_inquiry(listing_id):
@@ -398,18 +377,14 @@ def submit_inquiry(listing_id):
     )
     db.session.add(inquiry)
     db.session.commit()
-
     flash('Your inquiry has been sent! The admin will get back to you.', 'success')
     return redirect(url_for('listing_detail', id=listing_id))
-
 
 
 # Initialize database and create admin user
 def create_tables():
     with app.app_context():
         db.create_all()
-        
-        # Create admin user if doesn't exist
         admin = User.query.filter_by(email='admin@rentalink.com').first()
         if not admin:
             admin = User(
