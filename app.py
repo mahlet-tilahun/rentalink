@@ -24,10 +24,10 @@ class User(db.Model):
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     user_role = db.Column(db.String(20), default='renter')
-    
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -70,10 +70,11 @@ class Inquiry(db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(120))
     message = db.Column(db.Text)
+    responded = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    responded = db.Column(db.Boolean, default=False)
 
     listing = db.relationship('Listing', backref=db.backref('inquiries', lazy=True))
-
 
 # Routes
 @app.route('/')
@@ -87,9 +88,9 @@ def search():
     location = request.args.get('location', '')
     min_price = request.args.get('min_price', type=float)
     max_price = request.args.get('max_price', type=float)
-    
+
     query = Listing.query.filter_by(is_available=True)
-    
+
     if category:
         query = query.filter(Listing.type == category)
     if location:
@@ -98,12 +99,12 @@ def search():
         query = query.filter(Listing.price >= min_price)
     if max_price:
         query = query.filter(Listing.price <= max_price)
-    
+
     listings = query.all()
-    
-    return render_template('search.html', listings=listings, 
-                         category=category, location=location, 
-                         min_price=min_price, max_price=max_price)
+
+    return render_template('search.html', listings=listings,
+                           category=category, location=location,
+                           min_price=min_price, max_price=max_price)
 
 @app.route('/listing/<int:id>')
 def listing_detail(id):
@@ -152,7 +153,7 @@ def manage_listings():
 
     if search_query:
         query = query.filter(
-            Listing.title.ilike(f'%{search_query}%') | 
+            Listing.title.ilike(f'%{search_query}%') |
             Listing.location.ilike(f'%{search_query}%')
         )
     if type_filter:
@@ -261,8 +262,35 @@ def add_listing():
 def admin_inquiries():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-    inquiries = Inquiry.query.order_by(Inquiry.timestamp.desc()).all()
-    return render_template('admin/inquiries.html', inquiries=inquiries)
+
+    search = request.args.get('search', '')
+    response_filter = request.args.get('response_filter', '')
+
+    query = Inquiry.query
+
+    if search:
+        query = query.filter(
+            Inquiry.name.ilike(f'%{search}%') |
+            Inquiry.email.ilike(f'%{search}%')
+        )
+
+    if response_filter == 'responded':
+        query = query.filter(Inquiry.responded.is_(True))
+    elif response_filter == 'unresponded':
+        query = query.filter(Inquiry.responded.is_(False))
+
+    inquiries = query.order_by(Inquiry.timestamp.desc()).all()
+    new_inquiry_count = Inquiry.query.filter_by(responded=False).count()
+
+    return render_template('admin/inquiries.html', inquiries=inquiries, new_inquiry_count=new_inquiry_count)
+
+@app.route('/admin/inquiries/<int:inquiry_id>/update', methods=['POST'])
+def update_inquiry_status(inquiry_id):
+    inquiry = Inquiry.query.get_or_404(inquiry_id)
+    responded_value = request.form.get('responded', 'false')
+    inquiry.responded = responded_value.lower() == 'true'
+    db.session.commit()
+    return redirect(url_for('admin_inquiries'))
 
 @app.route('/listing/<int:listing_id>/add_review', methods=['POST'])
 def add_review(listing_id):
@@ -295,7 +323,7 @@ def add_review(listing_id):
     except Exception:
         flash('An error occurred while submitting your review. Please try again.', 'error')
         db.session.rollback()
-    
+
     return redirect(url_for('listing_detail', id=listing_id))
 
 @app.route('/admin/reservations')
@@ -355,7 +383,7 @@ def reserve(listing_id):
         db.session.commit()
         flash('Reservation successful! We will contact you soon.', 'success')
         return redirect(url_for('receipt', reservation_id=reservation.id))
-    
+
     return redirect(url_for('listing_detail', id=listing_id))
 
 @app.route('/receipt/<int:reservation_id>')
@@ -380,11 +408,18 @@ def submit_inquiry(listing_id):
     flash('Your inquiry has been sent! The admin will get back to you.', 'success')
     return redirect(url_for('listing_detail', id=listing_id))
 
-
-# Initialize database and create admin user
+# Create tables and ensure 'responded' column exists
 def create_tables():
     with app.app_context():
         db.create_all()
+
+        # Add 'responded' column if not already in the inquiry table
+        try:
+            db.engine.execute('ALTER TABLE inquiry ADD COLUMN responded BOOLEAN DEFAULT 0')
+        except Exception:
+            pass  # Column likely exists or can't be altered in SQLite
+
+        # Create admin user if it doesn't exist
         admin = User.query.filter_by(email='admin@rentalink.com').first()
         if not admin:
             admin = User(
@@ -397,7 +432,7 @@ def create_tables():
             db.session.add(admin)
             db.session.commit()
 
-
+# Only runs when executing app.py directly
 if __name__ == '__main__':
     create_tables()
     app.run(debug=True)
