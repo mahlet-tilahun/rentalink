@@ -364,8 +364,10 @@ def update_reservation_status(reservation_id):
 
 @app.context_processor
 def inject_counts():
-    new_reservations = Reservation.query.filter_by(status="Pending").count()
-    return dict(new_reservations=new_reservations)
+    new_inquiry_count = Inquiry.query.filter_by(responded=False).count()
+    new_reservations = Reservation.query.filter_by(status='Pending').count()
+    return dict(new_inquiry_count=new_inquiry_count, new_reservations=new_reservations)
+
 
 @app.route('/listing/<int:listing_id>/contact', methods=['POST'])
 def contact_owner(listing_id):
