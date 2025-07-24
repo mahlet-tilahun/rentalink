@@ -61,6 +61,7 @@ class Reservation(db.Model):
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='Pending')
 
     listing = db.relationship('Listing', backref=db.backref('reservations', lazy=True))
 
@@ -330,8 +331,41 @@ def add_review(listing_id):
 def admin_reservations():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
-    reservations = Reservation.query.order_by(Reservation.timestamp.desc()).all()
+
+    search = request.args.get('search', '')
+    status_filter = request.args.get('status_filter', '')
+    category_filter = request.args.get('category_filter', '')
+
+    query = Reservation.query.join(Listing)
+
+    if search:
+        query = query.filter(
+            Reservation.name.ilike(f'%{search}%') |
+            Reservation.email.ilike(f'%{search}%')
+        )
+
+    if status_filter:
+        query = query.filter(Reservation.status == status_filter)
+
+    if category_filter:
+        query = query.filter(Listing.type == category_filter)
+
+    reservations = query.order_by(Reservation.timestamp.desc()).all()
+
     return render_template('admin/reservations.html', reservations=reservations)
+
+@app.route('/admin/reservations/<int:reservation_id>/update', methods=['POST'])
+def update_reservation_status(reservation_id):
+    reservation = Reservation.query.get_or_404(reservation_id)
+    new_status = request.form.get('status', 'Pending')
+    reservation.status = new_status
+    db.session.commit()
+    return redirect(url_for('admin_reservations'))
+
+@app.context_processor
+def inject_counts():
+    new_reservations = Reservation.query.filter_by(status="Pending").count()
+    return dict(new_reservations=new_reservations)
 
 @app.route('/listing/<int:listing_id>/contact', methods=['POST'])
 def contact_owner(listing_id):
@@ -418,6 +452,10 @@ def create_tables():
             db.engine.execute('ALTER TABLE inquiry ADD COLUMN responded BOOLEAN DEFAULT 0')
         except Exception:
             pass  # Column likely exists or can't be altered in SQLite
+        try:
+            db.engine.execute('ALTER TABLE reservation ADD COLUMN status VARCHAR(20) DEFAULT "Pending"')
+        except Exception:
+            pass
 
         # Create admin user if it doesn't exist
         admin = User.query.filter_by(email='admin@rentalink.com').first()
