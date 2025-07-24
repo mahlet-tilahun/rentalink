@@ -63,7 +63,11 @@
                 </a>
                 <a class="nav-link" href="{{ url_for('admin_reservations') }}">
                     <i class="fas fa-calendar-check me-2"></i>Reservations
+                    {% if new_reservations > 0 %}
+                      <span class="badge bg-danger ms-2">{{ new_reservations }}</span>
+                    {% endif %}
                 </a>
+
                 <a class="nav-link" href="{{ url_for('admin_inquiries') }}">
                     <i class="fas fa-envelope-open-text me-2"></i>Inquiries
                 </a>
