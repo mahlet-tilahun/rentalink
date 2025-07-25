@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from sqlalchemy.orm import joinedload
 import os
 from datetime import datetime
 
@@ -51,6 +52,8 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='New')  
+    listing = db.relationship('Listing', backref='reviews')
 
 class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -132,7 +135,7 @@ def admin_dashboard():
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     listings = Listing.query.all()
-    reviews = Review.query.order_by(Review.timestamp.desc()).all()
+    reviews = Review.query.options(joinedload(Review.listing)).order_by(Review.timestamp.desc()).all()
     return render_template('admin/dashboard.html', listings=listings, reviews=reviews)
 
 @app.route('/admin/logout')
@@ -140,6 +143,21 @@ def admin_logout():
     session.pop('admin_id', None)
     flash('Logged out successfully!', 'success')
     return redirect(url_for('index'))
+
+@app.route('/admin/reviews')
+def admin_reviews():
+    new_review_count = Review.query.filter_by(status='New').count()
+    reviews = Review.query.order_by(Review.timestamp.desc()).all()
+    return render_template('admin/reviews.html', reviews=reviews, new_review_count=new_review_count)
+
+@app.route('/admin/reviews/update/<int:review_id>', methods=['POST'])
+def update_review_status(review_id):
+    review = Review.query.get_or_404(review_id)
+    review.status = request.form.get('status', 'New')
+    db.session.commit()
+    flash('Review status updated successfully.', 'success')
+    return redirect(url_for('admin_dashboard') + '#reviews')
+
 
 @app.route('/admin/manage-listings')
 def manage_listings():
@@ -364,9 +382,14 @@ def update_reservation_status(reservation_id):
 
 @app.context_processor
 def inject_counts():
-    new_inquiry_count = Inquiry.query.filter_by(responded=False).count()
     new_reservations = Reservation.query.filter_by(status='Pending').count()
-    return dict(new_inquiry_count=new_inquiry_count, new_reservations=new_reservations)
+    new_inquiry_count = Inquiry.query.filter_by(responded=False).count()
+    new_review_count = Review.query.filter_by(status='New').count()
+    return dict(
+        new_reservations=new_reservations,
+        new_inquiry_count=new_inquiry_count,
+        new_review_count=new_review_count
+    )
 
 
 @app.route('/listing/<int:listing_id>/contact', methods=['POST'])
@@ -449,17 +472,34 @@ def create_tables():
     with app.app_context():
         db.create_all()
 
-        # Add 'responded' column if not already in the inquiry table
+        # Ensure 'responded' column exists in inquiry table
         try:
             db.engine.execute('ALTER TABLE inquiry ADD COLUMN responded BOOLEAN DEFAULT 0')
         except Exception:
-            pass  # Column likely exists or can't be altered in SQLite
+            pass  # Already exists
+
+        # Ensure 'status' column exists in reservation table
         try:
             db.engine.execute('ALTER TABLE reservation ADD COLUMN status VARCHAR(20) DEFAULT "Pending"')
         except Exception:
             pass
 
-        # Create admin user if it doesn't exist
+        # Ensure 'status' column exists in review table
+        try:
+            db.engine.execute('ALTER TABLE review ADD COLUMN status VARCHAR(20) DEFAULT "New"')
+        except Exception:
+            pass  # Already exists or not needed
+        # Fix old reviews with missing status
+        try:
+            reviews_with_no_status = Review.query.filter((Review.status == None) | (Review.status == '')).all()
+            for review in reviews_with_no_status:
+                review.status = 'New'
+            if reviews_with_no_status:
+                db.session.commit()
+        except Exception:
+            pass  # Safe fail in case table not yet created
+
+        # Create default admin user if not exists
         admin = User.query.filter_by(email='admin@rentalink.com').first()
         if not admin:
             admin = User(
