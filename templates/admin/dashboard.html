@@ -75,9 +75,13 @@
               <span class="badge bg-danger">{{ new_inquiry_count }}</span>
             {% endif %}
           </a>
-          <a class="nav-link" href="#reviews" data-section="reviews">
-            <i class="fas fa-star me-2"></i>Reviews
+          <a class="nav-link d-flex justify-content-between align-items-center {% if request.path == '/admin/reviews' %}active{% endif %}" href="#reviews" data-section="reviews">
+                <span><i class="fas fa-star me-2"></i>Reviews</span>
+             {% if new_review_count and new_review_count > 0 %}
+                <span class="badge bg-danger">{{ new_review_count }}</span>
+             {% endif %}
           </a>
+
           <div class="border-top border-secondary mt-3 pt-3">
             <a class="nav-link" href="{{ url_for('index') }}" target="_blank">
               <i class="fas fa-external-link-alt me-2"></i>View Website
@@ -158,31 +162,79 @@
           </div>
         </div>
 
-        <!-- Reviews Section -->
+        <!--Reviews Section -->
         <div id="reviews-section" class="content-section" style="display: none;">
-          <h3>All Reviews</h3>
-          <table class="table">
-            <thead>
+          <h3 class="mb-3">All Reviews</h3>
+
+          <!-- Search & Filter Controls -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <input type="text" class="form-control me-2 mb-2" id="reviewSearch" placeholder="Search by reviewer, comment, or listing..." style="max-width: 300px;">
+            <div class="d-flex flex-wrap gap-2">
+              <select class="form-select" id="ratingFilter" style="width: 150px;">
+                <option value="">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+              <select class="form-select" id="statusFilter" style="width: 150px;">
+                <option value="">All Status</option>
+                <option value="New">New</option>
+                <option value="Reviewed">Reviewed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Review Table -->
+          {% if reviews|length > 0 %}
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
               <tr>
                 <th>Listing</th>
                 <th>Reviewer</th>
                 <th>Rating</th>
                 <th>Comment</th>
                 <th>Date</th>
+                <th>Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="reviewTableBody">
               {% for review in reviews %}
               <tr>
-                <td>{{ review.listing_id }}</td>
+                <td>
+                  {% set image_list = review.listing.image_urls.split(',') if review.listing.image_urls else [] %}
+                  {% if image_list %}
+                     <img src="{{ url_for('static', filename='images/listings/' ~ image_list[0]) }}" alt="Listing" width="50" class="me-2 rounded">
+                  {% else %}
+                     <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No Image" width="50" class="me-2 rounded">
+                  {% endif %}
+
+                  {{ review.listing.title }}
+                </td>
                 <td>{{ review.reviewer_name }}</td>
-                <td>{{ review.rating }}</td>
+                <td>
+                  {% for i in range(review.rating) %}
+                    <i class="fas fa-star text-warning"></i>
+                  {% endfor %}
+                </td>
                 <td>{{ review.comment }}</td>
                 <td>{{ review.timestamp.strftime('%Y-%m-%d') }}</td>
+                <td>
+                   <form method="POST" action="{{ url_for('update_review_status', review_id=review.id) }}">
+                      <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                         <option value="New" {% if review.status == 'New' %}selected{% endif %}>New</option>
+                         <option value="Reviewed" {% if review.status == 'Reviewed' %}selected{% endif %}>Reviewed</option>
+                      </select>
+                   </form>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
+          {% else %}
+            <p class="text-muted">No reviews found.</p>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -211,10 +263,54 @@
       });
     });
 
-    // On load, check hash or session
     const initialSection = window.location.hash.replace('#', '') || sessionStorage.getItem('activeSection') || 'dashboard';
     showSection(initialSection);
+
+    // ✅ Review Search & Filter Script
+    const searchInput = document.getElementById("reviewSearch");
+    const ratingFilter = document.getElementById("ratingFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const tableRows = document.querySelectorAll("#reviewTableBody tr");
+
+    function filterReviews() {
+      const search = searchInput.value.toLowerCase();
+      const rating = ratingFilter.value;
+      const status = statusFilter.value;
+
+      tableRows.forEach(row => {
+        const reviewer = row.children[1].textContent.toLowerCase();
+        const comment = row.children[3].textContent.toLowerCase();
+        const stars = row.children[2].querySelectorAll(".fa-star").length.toString();
+        const reviewStatus = row.children[5].textContent.trim();
+
+        const matchesSearch = reviewer.includes(search) || comment.includes(search);
+        const matchesRating = !rating || stars === rating;
+        const matchesStatus = !status || reviewStatus === status;
+
+        row.style.display = (matchesSearch && matchesRating && matchesStatus) ? "" : "none";
+      });
+    }
+
+    if (searchInput && ratingFilter && statusFilter) {
+      searchInput.addEventListener("input", filterReviews);
+      ratingFilter.addEventListener("change", filterReviews);
+      statusFilter.addEventListener("change", filterReviews);
+    }
   </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const activeSection = sessionStorage.getItem("activeSection");
+      if (activeSection) {
+        document.querySelectorAll(".nav-link").forEach(link => {
+          if (link.dataset.section === activeSection) {
+             link.classList.add("active");
+          } else {
+            link.classList.remove("active");
+          }
+       });
+     }
+  });
+</script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
