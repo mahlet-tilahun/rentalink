@@ -9,6 +9,7 @@ RentALink connects property owners with renters through an intuitive marketplace
 ![alt text](<Interface Structure.png>)
 
 Main Features 
+
 🏠 Add Listings
 Hosts create property listings with details, pricing, and photos.
 Submit for admin approval.
@@ -42,19 +43,22 @@ Prerequisites:
 Install Node.js (v16+) and MongoDB (v6+)
 
 Setup:
+
 Clone the repository: git clone https://github.com/mahlet-tilahun/rentalink.git
 Install backend dependencies in /server
 Install frontend dependencies in /client
 Configure environment variables using .env.example
 
 Run:
+
 Start MongoDB service
 Launch backend from /server
 Launch frontend from /client
-Access at: http://localhost:3000
+Access at
 
 SUPPORT:
-For assistance:
+
+For assistance.
 
 Create GitHub issue.
 
