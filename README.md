@@ -16,61 +16,55 @@ These are the issues and current problems that Rentalink as a Company intends to
 - > Print-friendly receipts.
 - > User-friendly design with Bootstrap.
 
+## 🛠️ **Tech Stack**
+
+- **Backend:** Flask (Python)
+- **Database:** SQLite (default, can be swapped for PostgreSQL/MySQL)
+- **Frontend:** HTML, CSS (Bootstrap), Jinja2 templates
+- **Deployment:** Local run with Flask’s dev server (can be containerized for production)
+
 RentALink connects property owners with renters through an intuitive marketplace.
 ![alt text](<Interface Structure.png>)
-
-Main Features 
-
-🏠 Add Listings
-Hosts create property listings with details, pricing, and photos.
-Submit for admin approval.
-Manage availability calendar.
-
-📅 Make Reservations
-Guests search and filter properties.
-View real-time availability.
-Book instantly with confirmation.
-
-⚙️ Manage Listings
-Edit property details and photos.
-Update pricing and availability.
-View booking statistics.
-
-💬 Handle Inquiries
-Guests contact hosts directly.
-Hosts respond via dashboard.
-Convert inquiries to bookings.
-
-📥 Manage Inquiries
-Track conversation history.
-Organize by status (new/replied/closed)
-Set reminders for follow-ups.
 
 [def]: <Interface Structure.png>
 
 WORKFLOW AND PROCESS. (Run Locally)
 
-Prerequisites:
-Install Node.js (v16+) and MongoDB (v6+)
+## 🚀 **How to run it locally**
 
-Setup:
+ **1 Clone the repository**
 
-Clone the repository: git clone https://github.com/mahlet-tilahun/rentalink.git
-Install backend dependencies in /server
-Install frontend dependencies in /client
-Configure environment variables using .env.example
+git clone https://github.com/mahlet-tilahun/rentalink.git
+cd rentalink
 
-Run:
+**2 Create and activate a virtual environment**
 
-Start MongoDB service
-Launch backend from /server
-Launch frontend from /client
-Access at
+python3 -m venv venv
+source venv/bin/activate
 
-SUPPORT:
+**3 Install dependencies**
+pip install -r requirements.txt
 
-For assistance.
+**4 Set up your environment**
+By default, it uses SQLite (instance/rentalink.db).
 
-Create GitHub issue.
+**5 Run the app**
+flask run
+or 
+python app.py
 
-Email support@rentalink@gmail.com
+**Note: depending on the python version you're using, you may need to add the version. For example if you're using python 3, the command should be python3 app.py**
+Open your browser and go to http://localhost:5000
+
+As it's important to not push the database for public by GitHub, we did not do so. Therefore, you will not see any listing on the home page. 
+
+**Access Admin Dashboard**
+http://127.0.0.1:5000/admin/login
+
+Enter the Demo credentials on the bottom of the page.
+
+On the Admin Dashboard, you can add and manage the listing as well. 
+## 📬 **Contributing**
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+**Africoders | RentaLink | 2025**
