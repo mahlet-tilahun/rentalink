@@ -16,6 +16,7 @@ These are the issues and current problems that Rentalink as a Company intends to
 - > Print-friendly receipts.
 - > User-friendly design with Bootstrap.
 
+
 ## 🛠️ **Tech Stack**
 
 - **Backend:** Flask (Python)
@@ -23,19 +24,54 @@ These are the issues and current problems that Rentalink as a Company intends to
 - **Frontend:** HTML, CSS (Bootstrap), Jinja2 templates
 - **Deployment:** Local run with Flask’s dev server (can be containerized for production)
 
-RentALink connects property owners with renters through an intuitive marketplace.
-![alt text](<Interface Structure.png>)
+## 🧱 Database Models Summary
 
-[def]: <Interface Structure.png>
+| Model       | Description                            |
+|-------------|----------------------------------------|
+| **User**        | Stores user login credentials and roles |
+| **Listing**     | Rental properties with description, price, and type |
+| **Reservation** | Booking record with user and time details |
+| **Inquiry**     | Messages sent by users about a listing |
 
 WORKFLOW AND PROCESS. (Run Locally)
 
 ## 🚀 **How to run it locally**
 
+### 📦 Prerequisites
+
+- Python 3.10+
+- Virtualenv (recommended)
+
  **1 Clone the repository**
 
 git clone https://github.com/mahlet-tilahun/rentalink.git
 cd rentalink
+## 📁 **Project Structure**
+rentalink/
+│
+├── instance/
+            ├── rentalink.db
+├── static/
+          ├── css
+          ├── images
+          ├── js
+├── templates/
+    ├── admin/
+        ├── add_listing.html
+        ├── dashboard.html
+        ├── edit_listing.html
+        ├── inquiries.html
+        ├── login.html
+        ├── manage_listings.html
+        ├── reservations.html
+|   ├── index.html
+|   ├── base.html
+│   ├── listing.html
+│   ├── search.html
+│   └── receipt.html
+├── app.py                      
+├── requirements.txt            
+└── README.md   
 
 **2 Create and activate a virtual environment**
 
@@ -54,9 +90,9 @@ or
 python app.py
 
 **Note: depending on the python version you're using, you may need to add the version. For example if you're using python 3, the command should be python3 app.py**
-Open your browser and go to http://localhost:5000
+Open your browser and go to http://127.0.0.1:5000
 
-As it's important to not push the database for public by GitHub, we did not do so. Therefore, you will not see any listing on the home page. 
+As it's important to not push the database for public by GitHub, we did not push the database. Therefore, you will not see any listing on the home page. 
 
 **Access Admin Dashboard**
 http://127.0.0.1:5000/admin/login
@@ -66,5 +102,11 @@ Enter the Demo credentials on the bottom of the page.
 On the Admin Dashboard, you can add and manage the listing as well. 
 ## 📬 **Contributing**
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+##👥 **Contact**
+**Africoders**
+
+GitHub: @mahlet-tilahu
+Email: admin@rentalink.rw
 
 **Africoders | RentaLink | 2025**
