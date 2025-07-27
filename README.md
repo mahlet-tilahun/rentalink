@@ -5,6 +5,17 @@ These are the issues and current problems that Rentalink as a Company intends to
  1. The Fragmented rental market in Rwanda with multiple platforms.
  2. inconsistent interfaces, and security risks.
 
+## 📌 **Features**
+
+- > Public-facing website to view and reserve properties.
+- > Admin panel to:
+  - Manage listings (add, edit, delete, search).
+  - Manage reservations.
+  - Manage reviews.
+- > Reservation system with automatic receipt generation.
+- > Print-friendly receipts.
+- > User-friendly design with Bootstrap.
+
 RentALink connects property owners with renters through an intuitive marketplace.
 ![alt text](<Interface Structure.png>)
 
